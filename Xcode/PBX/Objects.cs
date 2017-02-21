@@ -842,6 +842,11 @@ namespace UnityEditor.iOS.Xcode.PBX
         public List<string> targets = new List<string>();
         public List<string> knownAssetTags = new List<string>();
         public string buildConfigList;
+        // the name of the entitlements file required for some capabilities.
+        public string entitlementsFile;
+        public List<PBXCapabilityType.TargetCapabilityPair> capabilities = new List<PBXCapabilityType.TargetCapabilityPair>();
+        public Dictionary<string, string> teamIDs = new Dictionary<string, string>();
+
 
         public void AddReference(string productGroup, string projectRef)
         {
@@ -873,6 +878,28 @@ namespace UnityEditor.iOS.Xcode.PBX
                 var tags = attrs.CreateArray("knownAssetTags");
                 foreach (var tag in knownAssetTags)
                     tags.AddString(tag);
+            }
+
+            // Enable the capabilities.
+            foreach (var cap in capabilities)
+            {
+               var attrs = m_Properties.Contains("attributes") ? m_Properties["attributes"].AsDict() : m_Properties.CreateDict("attributes");
+               var targAttr = attrs.Contains("TargetAttributes") ? attrs["TargetAttributes"].AsDict() : attrs.CreateDict("TargetAttributes");
+               var target = targAttr.Contains(cap.targetGuid) ? targAttr[cap.targetGuid].AsDict() : targAttr.CreateDict(cap.targetGuid);
+               var sysCap = target.Contains("SystemCapabilities") ? target["SystemCapabilities"].AsDict() : target.CreateDict("SystemCapabilities");
+
+               var capabilityId = cap.capability.id;
+               var currentCapability = sysCap.Contains(capabilityId) ? sysCap[capabilityId].AsDict() : sysCap.CreateDict(capabilityId);
+               currentCapability.SetString("enabled", "1");
+            }
+
+            // Set the team id
+            foreach (KeyValuePair<string, string> teamID in teamIDs)
+            {
+               var attrs = m_Properties.Contains("attributes") ? m_Properties["attributes"].AsDict() : m_Properties.CreateDict("attributes");
+               var targAttr = attrs.Contains("TargetAttributes") ? attrs["TargetAttributes"].AsDict() : attrs.CreateDict("TargetAttributes");
+               var target = targAttr.Contains(teamID.Key) ? targAttr[teamID.Key].AsDict() : targAttr.CreateDict(teamID.Key);
+               target.SetString("DevelopmentTeam", teamID.Value);
             }
         }
 
@@ -906,6 +933,28 @@ namespace UnityEditor.iOS.Xcode.PBX
                     var tags = el["knownAssetTags"].AsArray();
                     foreach (var tag in tags.values)
                         knownAssetTags.Add(tag.AsString());
+                }
+
+                capabilities = new List<PBXCapabilityType.TargetCapabilityPair>();
+                teamIDs = new Dictionary<string, string>();
+
+                if (el.Contains("TargetAttributes"))
+                {
+                    var targetAttr = el["TargetAttributes"].AsDict();
+                    foreach (var attr in targetAttr.values)
+                    {
+                        if (attr.Key == "DevelopmentTeam")
+                        {
+                            teamIDs.Add(attr.Key, attr.Value.AsString());
+                        }
+
+                        if (attr.Key == "SystemCapabilities")
+                        {
+                            var caps = el["SystemCapabilities"].AsDict();
+                            foreach (var cap in caps.values)
+                                capabilities.Add(new PBXCapabilityType.TargetCapabilityPair(attr.Key, PBXCapabilityType.StringToPBXCapabilityType(cap.Value.AsString())));
+                        }
+                    }
                 }
             }
         }

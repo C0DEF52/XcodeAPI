@@ -241,6 +241,17 @@ namespace UnityEditor.iOS.Xcode
             }
         }
 
+        public void Create()
+        {
+            const string doc = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                               "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" +
+                               "<plist version=\"1.0\">" +
+                               "<dict>" +
+                               "</dict>" +
+                               "</plist>";
+            ReadFromString(doc);
+        }
+
         public void ReadFromFile(string path)
         {
             ReadFromString(File.ReadAllText(path));
@@ -315,7 +326,8 @@ namespace UnityEditor.iOS.Xcode
 
         public void WriteToFile(string path)
         {
-            File.WriteAllText(path, WriteToString());
+            System.Text.Encoding utf8WithoutBom = new System.Text.UTF8Encoding(false);
+            File.WriteAllText(path, WriteToString(), utf8WithoutBom);
         }
 
         public void WriteToStream(TextWriter tw)
@@ -332,7 +344,7 @@ namespace UnityEditor.iOS.Xcode
 
             var doc = new XDocument();
             doc.Add(rootEl);
-            return CleanDtdToString(doc);
+            return CleanDtdToString(doc).Replace("\r\n", "\n");
         }
     }
 

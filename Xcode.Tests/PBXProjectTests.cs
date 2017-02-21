@@ -406,5 +406,59 @@ namespace Unity.PureCSharpTests.iOSExtensions
             PBXProject proj = ReadPBXProject("base_repair.pbxproj");
             TestOutput(proj, "repair1.pbxproj");
         }
+
+        [Test]
+        public void AddCapabilityWorks()
+        {
+            ResetGuidGenerator();
+            PBXProject proj = ReadPBXProject();
+            string target = proj.TargetGuidByName(PBXProject.GetUnityTargetName());
+            proj.AddCapability(target, PBXCapabilityType.GameCenter);
+            TestOutput(proj, "add_capability.pbxproj");
+        }
+
+        [Test]
+        public void AddCapabilityWithEntitlementWorks()
+        {
+            ResetGuidGenerator();
+            PBXProject proj = ReadPBXProject();
+            string target = proj.TargetGuidByName(PBXProject.GetUnityTargetName());
+            proj.AddCapability(target, PBXCapabilityType.iCloud, Path.Combine(GetTestSourcePath(), "test.entitlements"));
+            TestOutput(proj, "add_capability_entitlement.pbxproj");
+        }
+
+        [Test]
+        public void AddMultipleCapabilitiesWorks()
+        {
+            ResetGuidGenerator();
+            PBXProject proj = ReadPBXProject();
+            string target = proj.TargetGuidByName(PBXProject.GetUnityTargetName());
+            proj.AddCapability(target, PBXCapabilityType.GameCenter);
+            proj.AddCapability(target, PBXCapabilityType.InAppPurchase);
+            proj.AddCapability(target, PBXCapabilityType.Maps);
+            TestOutput(proj, "add_multiple_capabilities.pbxproj");
+        }
+
+        [Test]
+        public void AddMultipleCapabilitiesWithEntitlementWorks()
+        {
+            ResetGuidGenerator();
+            PBXProject proj = ReadPBXProject();
+            string target = proj.TargetGuidByName(PBXProject.GetUnityTargetName());
+            proj.AddCapability(target, PBXCapabilityType.iCloud, Path.Combine(GetTestSourcePath(), "test.entitlements"));
+            proj.AddCapability(target, PBXCapabilityType.ApplePay, Path.Combine(GetTestSourcePath(), "test.entitlements"));
+            proj.AddCapability(target, PBXCapabilityType.Siri, Path.Combine(GetTestSourcePath(), "test.entitlements"));
+            TestOutput(proj, "add_multiple_capabilities_entitlement.pbxproj");
+        }
+
+        [Test]
+        public void SetTeamIdWorks()
+        {
+            ResetGuidGenerator();
+            PBXProject proj = ReadPBXProject();
+            string target = proj.TargetGuidByName(PBXProject.GetUnityTargetName());
+            proj.SetTeamId(target, "Z6SFPV59E3");
+            TestOutput(proj, "set_teamid.pbxproj");
+        }
     }
 }

@@ -1,8 +1,7 @@
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.IO;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using UnityEditor.iOS.Xcode.PBX;
 
 namespace UnityEditor.iOS.Xcode
@@ -34,7 +33,7 @@ namespace UnityEditor.iOS.Xcode
         Build,      // The path is relative to the build products folder
         Developer,  // The path is relative to the developer folder
         Sdk         // The path is relative to the sdk folder
-    };
+    }
 
     public class PBXProject
     {
@@ -380,7 +379,7 @@ namespace UnityEditor.iOS.Xcode
         /// <param name="tag">The name of the asset tag.</param>
         public void RemoveAssetTagFromDefaultInstall(string targetGuid, string tag)
         {
-            UpdateBuildProperty(targetGuid, "ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS", null, new string[]{tag});   
+            UpdateBuildProperty(targetGuid, "ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS", null, new[]{tag});
         }
 
         /// <summary>
@@ -435,7 +434,7 @@ namespace UnityEditor.iOS.Xcode
 
         public bool HasFramework(string framework)
         {
-            return ContainsFileByRealPath("System/Library/Frameworks/"+framework);
+            return ContainsFileByRealPath("System/Library/Frameworks/" + framework);
         }
 
         /// <summary>
@@ -449,7 +448,7 @@ namespace UnityEditor.iOS.Xcode
         /// <c>false</c> if the framework is required.</param>
         public void AddFrameworkToProject(string targetGuid, string framework, bool weak)
         {
-            string fileGuid = AddFile("System/Library/Frameworks/"+framework, "Frameworks/"+framework, PBXSourceTree.Sdk);
+            string fileGuid = AddFile("System/Library/Frameworks/" + framework, "Frameworks/" + framework, PBXSourceTree.Sdk);
             AddBuildFileImpl(targetGuid, fileGuid, weak, null);
         }
 
@@ -462,9 +461,61 @@ namespace UnityEditor.iOS.Xcode
         // FIXME: targetGuid is ignored at the moment
         public void RemoveFrameworkFromProject(string targetGuid, string framework)
         {
-            string fileGuid = FindFileGuidByRealPath("System/Library/Frameworks/"+framework);
+            string fileGuid = FindFileGuidByRealPath("System/Library/Frameworks/" + framework);
             if (fileGuid != null)
                 RemoveFile(fileGuid);
+        }
+
+        // Allow user to add a Capability
+        public bool AddCapability(string targetGuid, PBXCapabilityType capability, string entitlementsFilePath = null, bool addOptionalFramework = false)
+        {
+            // If the capability requires entitlements then you have to provide the name of it or we don't add the capability.
+            if (capability.requiresEntitlements && entitlementsFilePath == "")
+            {
+                throw new Exception("Couldn't add the Xcode Capability " + capability.id + " to the PBXProject file because this capability requires an entitlement file.");
+            }
+            var p = project.project;
+
+            // If an entitlement with a different name was added for another capability
+            // we don't add this capacity.
+            if (p.entitlementsFile != null && entitlementsFilePath != null && p.entitlementsFile != entitlementsFilePath)
+            {
+                if (p.capabilities.Count > 0)
+                    throw new WarningException("Attention, it seems that you have multiple entitlements file. Only one will be added the Project : " + p.entitlementsFile);
+
+                return false;
+            }
+
+            // Add the capability only if it doesn't already exist.
+            if (p.capabilities.Contains(new PBXCapabilityType.TargetCapabilityPair(targetGuid, capability)))
+            {
+                throw new WarningException("This capability has already been added. Method ignored");
+            }
+
+            p.capabilities.Add(new PBXCapabilityType.TargetCapabilityPair(targetGuid, capability));
+
+            // Add the required framework.
+            if (capability.framework != "" && !capability.optionalFramework ||
+               (capability.framework != "" && capability.optionalFramework && addOptionalFramework))
+            {
+                AddFrameworkToProject(targetGuid, capability.framework, false);
+            }
+
+            // Finally add the entitlement code signing if it wasn't added before.
+            if (entitlementsFilePath != null && p.entitlementsFile == null)
+            {
+                p.entitlementsFile = entitlementsFilePath;
+                AddFileImpl(entitlementsFilePath,  entitlementsFilePath, PBXSourceTree.Source, false);
+                SetBuildProperty(targetGuid, "CODE_SIGN_ENTITLEMENTS", PBXPath.FixSlashes(entitlementsFilePath));
+            }
+            return true;
+        }
+
+        // The Xcode project needs a team set to be able to complete code signing or to add some capabilities.
+        public void SetTeamId(string targetGuid, string teamId)
+        {
+            SetBuildProperty(targetGuid, "DEVELOPMENT_TEAM", teamId);
+            project.project.teamIDs.Add(targetGuid, teamId);
         }
 
         /// <summary>
@@ -951,7 +1002,7 @@ namespace UnityEditor.iOS.Xcode
             if (targetGuid == project.project.guid)
                 return project.project.buildConfigList;
             else
-                return nativeTargets[targetGuid].buildConfigList;
+            return nativeTargets[targetGuid].buildConfigList;
         }
 
         // Sets the baseConfigurationReference key for a XCBuildConfiguration. 
@@ -1197,15 +1248,21 @@ namespace UnityEditor.iOS.Xcode
             PBXElementDict properties = project.project.GetPropertiesRaw();
             PBXElementDict attributes;
             PBXElementDict targetAttributes;
-            if (properties.Contains("attributes")) {
+            if (properties.Contains("attributes"))
+			{
                 attributes = properties["attributes"] as PBXElementDict;
-            } else {
+            }
+			else
+			{
                 attributes = properties.CreateDict("attributes");
             }
 
-            if (attributes.Contains("TargetAttributes")) {
+            if (attributes.Contains("TargetAttributes"))
+			{
                 targetAttributes = attributes["TargetAttributes"] as PBXElementDict;
-            } else {
+            } 
+			else
+			{
                 targetAttributes = attributes.CreateDict("TargetAttributes");
             }
 
@@ -1214,7 +1271,9 @@ namespace UnityEditor.iOS.Xcode
                 if (targetAttributes.Contains(target.Key))
                 {
                     targetAttributesRaw = targetAttributes[target.Key].AsDict();
-                } else {
+                }
+				else
+				{
                     targetAttributesRaw = targetAttributes.CreateDict(target.Key);
                 }
                 targetAttributesRaw.SetString(key, value); 
@@ -1223,5 +1282,4 @@ namespace UnityEditor.iOS.Xcode
 
         }
     }
-
 } // namespace UnityEditor.iOS.Xcode
