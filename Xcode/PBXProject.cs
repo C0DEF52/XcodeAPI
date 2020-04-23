@@ -1436,15 +1436,10 @@ namespace UnityEditor.iOS.Xcode.Custom
             path = PBXPath.FixSlashes(path);
 
             PBXVariantGroupData variantGroup = VariantGroupsGetByName(variantGroupName);
-
             if (variantGroup == null)
-            {
                 variantGroup = CreateLocalizableVariantGroup(variantGroupName);
-            }
 
             PBXFileReferenceData fileRef;
-
-            // check if file reference exists
             if (!localizations.TryGetValue(path, out fileRef))
             {
                 fileRef = PBXFileReferenceData.CreateFromFile(path, PBXPath.GetFilename(path), PBXSourceTree.Group);
@@ -1452,9 +1447,33 @@ namespace UnityEditor.iOS.Xcode.Custom
             }
 
             if (!variantGroup.children.Contains(fileRef.guid))
-            {
                 variantGroup.children.AddGUID(fileRef.guid);
-            }
+        }
+
+        public void RemoveLocalization(string path, string fileRefName, string variantGroupName)
+        {
+            Dictionary<string, PBXFileReferenceData> all = LocalizationFileRefsGetAll(fileRefName);
+
+            path = PBXPath.FixSlashes(path);
+
+            PBXVariantGroupData variantGroup = VariantGroupsGetByName(variantGroupName);
+            if (variantGroup == null )
+                return;
+
+            PBXFileReferenceData fileRef;
+            if (!all.TryGetValue(path, out fileRef))
+                return;
+
+            variantGroup.children.RemoveGUID(fileRef.guid);
+        }
+
+        public void RemoveLocalizationVariantGroup(string variantGroupName)
+        {
+            PBXVariantGroupData variantGroup = VariantGroupsGetByName(variantGroupName);
+            if (variantGroup == null)
+                return;
+
+            RemoveGroupChildrenRecursive(variantGroup);
         }
 
         /// <summary>
