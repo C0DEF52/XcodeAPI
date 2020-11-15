@@ -4,7 +4,7 @@ using System.IO;
 #if UNITY_XCODE_API_BUILD
 using UnityEditor.iOS.Xcode;
 #else
-using UnityEditor.iOS.Xcode.Custom;
+using UnityEditor.iOS.Xcode.Fiftytwo;
 #endif
 
 namespace UnityEditor.iOS.Xcode.Tests

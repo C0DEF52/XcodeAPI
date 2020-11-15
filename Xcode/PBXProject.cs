@@ -5,13 +5,13 @@ using System.IO;
 #if UNITY_XCODE_API_BUILD
 using UnityEditor.iOS.Xcode.PBX;
 #else
-using UnityEditor.iOS.Xcode.Custom.PBX;
+using UnityEditor.iOS.Xcode.Fiftytwo.PBX;
 #endif
 
 #if UNITY_XCODE_API_BUILD
 namespace UnityEditor.iOS.Xcode
 #else
-namespace UnityEditor.iOS.Xcode.Custom
+namespace UnityEditor.iOS.Xcode.Fiftytwo
 #endif
 {
     using PBXBuildFileSection           = KnownSectionBase<PBXBuildFileData>;

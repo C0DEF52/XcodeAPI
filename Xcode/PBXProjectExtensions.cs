@@ -6,13 +6,13 @@ using System;
 #if UNITY_XCODE_API_BUILD
 using UnityEditor.iOS.Xcode.PBX;
 #else
-using UnityEditor.iOS.Xcode.Custom.PBX;
+using UnityEditor.iOS.Xcode.Fiftytwo.PBX;
 #endif
 
 #if UNITY_XCODE_API_BUILD
 namespace UnityEditor.iOS.Xcode.Extensions
 #else
-namespace UnityEditor.iOS.Xcode.Custom.Extensions
+namespace UnityEditor.iOS.Xcode.Fiftytwo.Extensions
 #endif
 {
     /*  This class implements a number of static methods for performing common tasks

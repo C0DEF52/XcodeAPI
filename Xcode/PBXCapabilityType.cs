@@ -1,7 +1,7 @@
 ﻿#if UNITY_XCODE_API_BUILD
 namespace UnityEditor.iOS.Xcode
 #else
-namespace UnityEditor.iOS.Xcode.Custom
+namespace UnityEditor.iOS.Xcode.Fiftytwo
 #endif
 {
     /// <summary>

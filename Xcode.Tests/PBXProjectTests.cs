@@ -5,8 +5,8 @@ using System.IO;
 using UnityEditor.iOS.Xcode;
 using UnityEditor.iOS.Xcode.Extensions;
 #else
-using UnityEditor.iOS.Xcode.Custom;
-using UnityEditor.iOS.Xcode.Custom.Extensions;
+using UnityEditor.iOS.Xcode.Fiftytwo;
+using UnityEditor.iOS.Xcode.Fiftytwo.Extensions;
 #endif
 
 namespace UnityEditor.iOS.Xcode.Tests
@@ -49,7 +49,7 @@ namespace UnityEditor.iOS.Xcode.Tests
 #if UNITY_XCODE_API_BUILD
             UnityEditor.iOS.Xcode.PBX.PBXGUID.SetGuidGenerator(LinearGuidGenerator.Generate);
 #else
-            UnityEditor.iOS.Xcode.Custom.PBX.PBXGUID.SetGuidGenerator(LinearGuidGenerator.Generate);
+            UnityEditor.iOS.Xcode.Fiftytwo.PBX.PBXGUID.SetGuidGenerator(LinearGuidGenerator.Generate);
 #endif
             LinearGuidGenerator.Reset();
         }

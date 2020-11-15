@@ -5,8 +5,8 @@ using System.IO;
 using UnityEditor.iOS.Xcode;
 using UnityEditor.iOS.Xcode.Extensions;
 #else
-using UnityEditor.iOS.Xcode.Custom;
-using UnityEditor.iOS.Xcode.Custom.Extensions;
+using UnityEditor.iOS.Xcode.Fiftytwo;
+using UnityEditor.iOS.Xcode.Fiftytwo.Extensions;
 #endif
 
 namespace UnityEditor.iOS.Xcode.Tests

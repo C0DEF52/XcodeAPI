@@ -6,13 +6,13 @@ using System;
 #if UNITY_XCODE_API_BUILD
 using UnityEditor.iOS.Xcode.PBX;
 #else
-using UnityEditor.iOS.Xcode.Custom.PBX;
+using UnityEditor.iOS.Xcode.Fiftytwo.PBX;
 #endif
 
 #if UNITY_XCODE_API_BUILD
 namespace UnityEditor.iOS.Xcode
 #else
-namespace UnityEditor.iOS.Xcode.Custom
+namespace UnityEditor.iOS.Xcode.Fiftytwo
 #endif
 {
     using PBXBuildFileSection           = KnownSectionBase<PBXBuildFileData>;
@@ -146,10 +146,14 @@ namespace UnityEditor.iOS.Xcode.Custom
         {
             PBXFileReferenceData fileRef = fileRefs[guid];
             fileRefs.RemoveEntry(guid);
-            m_ProjectPathToFileRefMap.Remove(m_FileRefGuidToProjectPathMap[guid]);
+            if (m_FileRefGuidToProjectPathMap.TryGetValue(guid, out var projectPath))
+                m_ProjectPathToFileRefMap.Remove(projectPath);
             m_FileRefGuidToProjectPathMap.Remove(guid);
-            foreach (var tree in FileTypeUtils.AllAbsoluteSourceTrees())
-                m_RealPathToFileRefMap[tree].Remove(fileRef.path);
+            if (fileRef != null)
+            {
+                foreach (var tree in FileTypeUtils.AllAbsoluteSourceTrees())
+                    m_RealPathToFileRefMap[tree].Remove(fileRef.path);
+            }
             m_GuidToParentGroupMap.Remove(guid);
         }
 
