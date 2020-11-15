@@ -1,0 +1,10 @@
+*.unc-backup*
+.DS_Store
+bin/
+obj/
+.vs/
+.idea/
+Unity.iOS.Extensions.XCode.sln.DotSettings.user
+packages/NUnit*
+Xcode.Tests/packages.config
+ProjectCapabilityManagerTestOutput/
